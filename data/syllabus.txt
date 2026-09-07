@@ -1,0 +1,34 @@
+COURSE SYLLABUS OVERVIEW
+
+Course Code: CS301 - Data Structures and Algorithms
+Credits: 4
+Semester: 3
+Unit 1: Arrays, Linked Lists, Stacks and Queues - basic operations, complexity analysis.
+Unit 2: Trees and Graphs - binary trees, BST, AVL trees, graph traversal (BFS/DFS).
+Unit 3: Sorting and Searching Algorithms - quicksort, mergesort, heapsort, binary search.
+Unit 4: Dynamic Programming and Greedy Algorithms - knapsack, LCS, Dijkstra's algorithm.
+Unit 5: Hashing and Advanced Data Structures - hash tables, tries, disjoint sets.
+Textbook: "Introduction to Algorithms" by Cormen, Leiserson, Rivest, Stein.
+Internal Assessment: 2 tests (15 marks each) + Assignment (10 marks) = 40 marks internal, 60 marks end-semester exam.
+
+Course Code: CS402 - Cloud Computing Fundamentals
+Credits: 3
+Semester: 4
+Unit 1: Introduction to Cloud Computing - service models (IaaS, PaaS, SaaS), deployment models.
+Unit 2: Virtualization and Containerization - hypervisors, Docker, Kubernetes basics.
+Unit 3: Cloud Storage and Databases - object storage, NoSQL, distributed file systems.
+Unit 4: Cloud Security - identity and access management, encryption, compliance.
+Unit 5: Cloud Platforms - AWS, Azure, IBM Cloud, GCP core services comparison.
+Textbook: "Cloud Computing: Concepts, Technology & Architecture" by Erl, Puttini, Mahmood.
+Internal Assessment: 2 tests (15 marks each) + Lab records (10 marks) = 40 marks internal, 60 marks end-semester exam.
+
+Course Code: AI501 - Artificial Intelligence and Agentic Systems
+Credits: 3
+Semester: 5
+Unit 1: Foundations of AI - search algorithms, knowledge representation.
+Unit 2: Machine Learning Basics - supervised, unsupervised learning, evaluation metrics.
+Unit 3: Natural Language Processing - tokenization, embeddings, transformers.
+Unit 4: Retrieval-Augmented Generation (RAG) - vector databases, semantic search, chunking strategies.
+Unit 5: AI Agents - tool calling, memory systems, multi-agent orchestration, agentic workflows.
+Textbook: "Artificial Intelligence: A Modern Approach" by Russell & Norvig.
+Internal Assessment: 2 tests (15 marks each) + Project (10 marks) = 40 marks internal, 60 marks end-semester exam.
