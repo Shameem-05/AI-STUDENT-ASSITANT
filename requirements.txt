@@ -1,0 +1,14 @@
+# The core app has ZERO required third-party dependencies. It only uses the
+# Python standard library (sqlite3, urllib, re, math, json, os, dataclasses)
+# plus a local Ollama installation (separate from pip) for AI-generated
+# answers. This keeps install time and memory footprint minimal, which
+# matters on low-end devices.
+#
+# `pip install -r requirements.txt` with this file is a no-op by design --
+# there is nothing to install unless you enable an optional backend below.
+
+# --- Optional: only needed if you want IBM watsonx instead of / alongside Ollama ---
+# requests>=2.31.0
+
+# --- Optional: only needed if you want an OpenAI-compatible API instead of / alongside Ollama ---
+# openai>=1.0.0

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Support Assistant</title>
+<style>
+  :root{
+    --ink:#12181A;
+    --panel:#1A2225;
+    --panel-2:#212B2E;
+    --line:#313D3F;
+    --green:#4C8A63;
+    --green-dim:#365F45;
+    --brass:#C9A24B;
+    --paper:#EFEAD9;
+    --paper-dim:#9BA6A0;
+    --user-bubble:#25333A;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'IBM Plex Sans', -apple-system, Segoe UI, Roboto, sans-serif;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';
+    src:local('IBM Plex Sans');
+  }
+
+  /* ---------- header / crest ---------- */
+  header{
+    padding:22px 24px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-shrink:0;
+  }
+  .crest{
+    width:44px;height:44px;flex-shrink:0;
+  }
+  header h1{
+    font-family:'IBM Plex Serif', Georgia, serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0;
+    color:var(--paper);
+    letter-spacing:0.2px;
+  }
+  header p{
+    margin:3px 0 0;
+    font-size:13px;
+    color:var(--paper-dim);
+  }
+  header .caps{
+    color:var(--brass);
+  }
+
+  /* ---------- layout ---------- */
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    max-width:780px;
+    width:100%;
+    margin:0 auto;
+    padding:0 20px;
+    min-height:0;
+  }
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .chip{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--paper-dim);
+    padding:7px 12px;
+    border-radius:3px;
+    font-size:12.5px;
+    cursor:pointer;
+    font-family:inherit;
+    transition:border-color .15s, color .15s;
+  }
+  .chip:hover{
+    border-color:var(--green);
+    color:var(--paper);
+  }
+
+  #log{
+    flex:1;
+    overflow-y:auto;
+    padding:22px 0 10px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  .msg{
+    max-width:88%;
+    animation:rise .25s ease;
+  }
+  @keyframes rise{
+    from{opacity:0; transform:translateY(6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .msg.user{
+    align-self:flex-end;
+  }
+  .msg.assistant{
+    align-self:flex-start;
+  }
+  .bubble{
+    padding:12px 15px;
+    font-size:14.5px;
+    line-height:1.55;
+  }
+  .msg.user .bubble{
+    background:var(--user-bubble);
+    border-radius:10px 10px 2px 10px;
+  }
+  .msg.assistant .bubble{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:3px solid var(--green);
+    border-radius:2px 10px 10px 10px;
+  }
+  .bubble ul{margin:6px 0 0; padding-left:18px;}
+  .bubble li{margin-bottom:4px;}
+  .bubble strong{color:var(--brass); font-weight:600;}
+
+  .provenance{
+    margin-top:8px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .stamp{
+    font-size:10.5px;
+    color:var(--green);
+    border:1px solid var(--green-dim);
+    padding:2px 7px;
+    border-radius:2px;
+    letter-spacing:0.3px;
+  }
+  .stamp.tool{ color:var(--brass); border-color:#6b5827; }
+
+  .system-note{
+    align-self:center;
+    font-size:12px;
+    color:var(--paper-dim);
+    border:1px dashed var(--line);
+    padding:6px 14px;
+    border-radius:3px;
+  }
+
+  /* ---------- input row ---------- */
+  .composer{
+    flex-shrink:0;
+    padding:16px 0 20px;
+    border-top:1px solid var(--line);
+  }
+  .composer-row{
+    display:flex;
+    gap:10px;
+  }
+  #question{
+    flex:1;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--paper);
+    padding:12px 14px;
+    border-radius:6px;
+    font-size:14.5px;
+    font-family:inherit;
+    resize:none;
+  }
+  #question:focus{
+    outline:none;
+    border-color:var(--green);
+  }
+  #send{
+    background:var(--green);
+    color:#0d1210;
+    border:none;
+    padding:0 20px;
+    border-radius:6px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  #send:hover{ background:#5a9c72; }
+  #send:disabled{ background:var(--green-dim); cursor:default; }
+
+  .util-row{
+    display:flex;
+    gap:16px;
+    margin-top:10px;
+    font-size:12px;
+  }
+  .util-row button{
+    background:none;
+    border:none;
+    color:var(--paper-dim);
+    cursor:pointer;
+    font-family:inherit;
+    font-size:12px;
+    padding:0;
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .util-row button:hover{ color:var(--paper); }
+
+  #log::-webkit-scrollbar{ width:8px; }
+  #log::-webkit-scrollbar-thumb{ background:var(--panel-2); border-radius:4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="crest" viewBox="0 0 44 44" fill="none">
+    <circle cx="22" cy="22" r="20" stroke="#C9A24B" stroke-width="1.4"/>
+    <path d="M22 10 L32 15 V23 C32 30 27.5 33.5 22 35 C16.5 33.5 12 30 12 23 V15 Z" stroke="#4C8A63" stroke-width="1.4"/>
+    <path d="M16 21 L22 24 L28 21" stroke="#EFEAD9" stroke-width="1.2"/>
+    <path d="M22 24 V29" stroke="#EFEAD9" stroke-width="1.2"/>
+  </svg>
+  <div>
+    <h1>Campus Support Assistant</h1>
+    <p><span class="caps">RAG</span> · <span class="caps">Tools</span> · <span class="caps">Memory</span> — regulations, syllabus, exams, fees &amp; notices</p>
+  </div>
+</header>
+
+<main>
+  <div class="chips" id="chips"></div>
+  <div id="log"></div>
+
+  <div class="composer">
+    <div class="composer-row">
+      <input id="question" type="text" placeholder="Ask about regulations, your exam, fees, or notices…" autocomplete="off">
+      <button id="send">Ask</button>
+    </div>
+    <div class="util-row">
+      <button id="btn-profile">What do you remember about me?</button>
+      <button id="btn-stats">Knowledge base stats</button>
+      <button id="btn-reset">Reset conversation</button>
+    </div>
+  </div>
+</main>
+
+<script>
+/* =========================================================================
+   KNOWLEDGE BASE  (mirrors data/*.txt from the Python project, chunked the
+   same way — one chunk per paragraph/section)
+========================================================================= */
+const DOCS = [];
+function addDoc(source, raw){
+  raw.split(/\n\s*\n/).map(s=>s.trim()).filter(s=>s.length>20)
+     .forEach(text=>DOCS.push({text, source}));
+}
+
+addDoc("regulations.txt", `
+1. Attendance Policy
+Students must maintain a minimum of 75% attendance in each course to be eligible to sit for the end-semester examination. Students with attendance between 65% and 74% may apply for condonation through the Head of Department, subject to a valid medical or personal reason supported by documents. Students below 65% attendance are detained and must repeat the course.
+
+2. Examination Eligibility
+A student is eligible to appear for the end-semester examination only if: attendance requirement (Section 1) is satisfied, all internal assessments for the course have been completed, and all library dues and hostel/mess dues are cleared.
+
+3. Grading System
+The college follows a 10-point Cumulative Grade Point Average (CGPA) system. Grade O = 10 points (90-100 marks). Grade A+ = 9 points (80-89 marks). Grade A = 8 points (70-79 marks). Grade B+ = 7 points (60-69 marks). Grade B = 6 points (50-59 marks). Grade C = 5 points (40-49 marks). Grade F = 0 points (below 40 marks, Fail).
+
+4. Revaluation and Retest
+Students who are not satisfied with their internal or end-semester marks may apply for revaluation within 10 days of result publication by paying the prescribed fee at the Examination Cell. Students who fail in a course may apply for a supplementary/retest in the following semester.
+
+5. Backlog Policy
+A student can carry a maximum of 3 backlog subjects at a time to be promoted to the next year. Students with more than 3 backlogs will not be promoted and must clear the backlog subjects before proceeding.
+
+6. Code of Conduct
+Ragging in any form is strictly prohibited and punishable under the college anti-ragging policy, which may lead to suspension or expulsion. Use of unfair means during examinations leads to immediate cancellation of the exam and disciplinary action by the Academic Committee.
+
+7. Leave of Absence
+Students requiring leave for more than 3 consecutive working days must submit a leave application to the Head of Department along with supporting documents at least 2 days in advance, except in emergencies.
+
+8. Scholarship and Fee Concession
+Merit scholarships are awarded to the top 5% of students in each department based on previous semester CGPA. Fee concessions for economically weaker sections are processed through the Dean of Student Affairs office at the start of each academic year.
+`);
+
+addDoc("syllabus.txt", `
+Course Code: CS301 - Data Structures and Algorithms. Credits: 4. Semester: 3.
+Unit 1: Arrays, Linked Lists, Stacks and Queues. Unit 2: Trees and Graphs. Unit 3: Sorting and Searching Algorithms. Unit 4: Dynamic Programming and Greedy Algorithms. Unit 5: Hashing and Advanced Data Structures. Textbook: "Introduction to Algorithms" by Cormen, Leiserson, Rivest, Stein. Internal Assessment: 2 tests (15 marks each) + Assignment (10 marks) = 40 marks internal, 60 marks end-semester exam.
+
+Course Code: CS402 - Cloud Computing Fundamentals. Credits: 3. Semester: 4.
+Unit 1: Introduction to Cloud Computing - service models (IaaS, PaaS, SaaS), deployment models. Unit 2: Virtualization and Containerization - hypervisors, Docker, Kubernetes basics. Unit 3: Cloud Storage and Databases - object storage, NoSQL, distributed file systems. Unit 4: Cloud Security - identity and access management, encryption, compliance. Unit 5: Cloud Platforms - AWS, Azure, IBM Cloud, GCP core services comparison. Textbook: "Cloud Computing: Concepts, Technology & Architecture" by Erl, Puttini, Mahmood. Internal Assessment: 2 tests (15 marks each) + Lab records (10 marks) = 40 marks internal, 60 marks end-semester exam.
+
+Course Code: AI501 - Artificial Intelligence and Agentic Systems. Credits: 3. Semester: 5.
+Unit 1: Foundations of AI - search algorithms, knowledge representation. Unit 2: Machine Learning Basics. Unit 3: Natural Language Processing - tokenization, embeddings, transformers. Unit 4: Retrieval-Augmented Generation (RAG) - vector databases, semantic search, chunking strategies. Unit 5: AI Agents - tool calling, memory systems, multi-agent orchestration, agentic workflows. Textbook: "Artificial Intelligence: A Modern Approach" by Russell & Norvig. Internal Assessment: 2 tests (15 marks each) + Project (10 marks) = 40 marks internal, 60 marks end-semester exam.
+`);
+
+addDoc("faq.txt", `
+Q: How do I apply for a bonafide certificate? A: Submit a request through the Student Portal under "Certificate Requests" or apply in person at the Administrative Office with your ID card. Certificates are usually issued within 3 working days.
+
+Q: What is the procedure to get a transcript? A: Transcripts can be requested from the Examination Cell by filling out Form TR-1, available on the college website, and paying the transcript fee. Processing takes 5-7 working days.
+
+Q: How can I reset my student portal password? A: Click "Forgot Password" on the login page and follow the OTP verification sent to your registered email or phone number. If the issue persists, contact the IT Helpdesk.
+
+Q: Where can I check the academic calendar? A: The academic calendar is published on the college website under "Academics > Academic Calendar" and updated on the notice board each semester.
+
+Q: How do I apply for a hostel room? A: Hostel applications open at the start of each academic year through the Hostel Office, along with the fee receipt and a medical fitness certificate.
+
+Q: Who do I contact for scholarship-related queries? A: Scholarship queries are handled by the Dean of Student Affairs office, room 204, Admin Block.
+
+Q: How do I join a student club or committee? A: Club recruitment happens during the first month of each semester through the Student Activity Portal or the club's faculty coordinator.
+
+Q: What should I do if I miss an internal test due to illness? A: Submit a medical certificate to your Head of Department within 3 days of the missed test to be considered for a make-up test.
+
+Q: How do I raise a complaint about a faculty member or facility? A: Complaints can be submitted through the Grievance Redressal Portal on the college website, or in writing to the Grievance Redressal Committee.
+
+Q: Can I change my elective subject after the semester begins? A: Elective changes are only permitted within the first 2 weeks of the semester, subject to seat availability, via an Elective Change Request Form.
+`);
+
+addDoc("notices.txt", `
+NOTICE #101 (2026-09-01) Mid-Semester Examination Schedule: Mid-semester exams for all UG and PG programs will be held from 2026-09-15 to 2026-09-22. Timetable published by 2026-09-08.
+
+NOTICE #102 (2026-09-02) Library Timings Extended: Due to upcoming examinations, the Central Library will remain open 8:00 AM–11:00 PM on weekdays and 9:00 AM–6:00 PM on weekends from 2026-09-05 until exams end.
+
+NOTICE #103 (2026-09-03) Placement Drive - TNSDC Campus Connect: The TNSDC Besant Campus Connect placement drive will be conducted for final year students. Registration closes on 2026-09-10.
+
+NOTICE #104 (2026-09-04) Fee Payment Deadline: Last date for tuition fee payment without late fine is 2026-09-20. A late fine of Rs. 500 per week applies after this date.
+
+NOTICE #105 (2026-09-05) Guest Lecture on Cloud Computing and AI Agents: A guest lecture "Building Agentic AI Systems on the Cloud" will be held on 2026-09-12 at 2:00 PM in the Main Auditorium.
+
+NOTICE #106 (2026-09-06) Hostel Maintenance Fee: Hostel residents' quarterly maintenance fee is due by 2026-09-25. Non-payment may restrict mess access.
+
+NOTICE #107 (2026-09-06) Sports Day Postponed: Annual Sports Day, originally scheduled for 2026-09-10, has been postponed to 2026-09-24 due to weather conditions.
+`);
+
+/* =========================================================================
+   RAG — lightweight TF-IDF + cosine similarity retriever (vanilla JS,
+   equivalent role to rag/retriever.py's TfidfVectorizer)
+========================================================================= */
+const STOPWORDS = new Set(("a an the is are was were be been being of to in on at for with by from as "+
+  "and or but if then than so this that these those it its i you he she they we my your his her their our "+
+  "what when where who how do does did can could would should will just about not no").split(" "));
+
+function tokenize(text){
+  return (text.toLowerCase().match(/[a-z']+/g) || []).filter(t=>t.length>1 && !STOPWORDS.has(t));
+}
+
+const docTokens = DOCS.map(d=>tokenize(d.text));
+const df = new Map();
+docTokens.forEach(tokens=>{
+  new Set(tokens).forEach(t=> df.set(t, (df.get(t)||0)+1));
+});
+const N = DOCS.length;
+function idf(term){ return Math.log((N+1)/((df.get(term)||0)+1)) + 1; }
+
+function vectorize(tokens){
+  const tf = new Map();
+  tokens.forEach(t=> tf.set(t, (tf.get(t)||0)+1));
+  const vec = new Map();
+  tf.forEach((count, term)=> vec.set(term, count * idf(term)));
+  let norm = 0;
+  vec.forEach(w=> norm += w*w);
+  norm = Math.sqrt(norm) || 1;
+  return {vec, norm};
+}
+const docVectors = docTokens.map(vectorize);
+
+function cosine(qVec, qNorm, dVec, dNorm){
+  let dot = 0;
+  const [smaller, larger] = qVec.size < dVec.size ? [qVec, dVec] : [dVec, qVec];
+  smaller.forEach((w, term)=>{
+    if(larger.has(term)) dot += w * larger.get(term);
+  });
+  return dot / (qNorm * dNorm);
+}
+
+function ragQuery(question, topK=3, minScore=0.06){
+  const {vec, norm} = vectorize(tokenize(question));
+  const scored = DOCS.map((d,i)=>({
+    text:d.text, source:d.source,
+    score: cosine(vec, norm, docVectors[i].vec, docVectors[i].norm)
+  }));
+  return scored.sort((a,b)=>b.score-a.score).slice(0,topK).filter(r=>r.score>=minScore);
+}
+
+/* =========================================================================
+   TOOLS — deterministic structured lookups (mirrors tools/tools.py)
+========================================================================= */
+const EXAM_SCHEDULE = {
+  CS301:{exam_date:"2026-09-16", time:"10:00 AM - 1:00 PM", room:"Block A - 204"},
+  CS402:{exam_date:"2026-09-18", time:"2:00 PM - 5:00 PM", room:"Block B - 101"},
+  AI501:{exam_date:"2026-09-20", time:"10:00 AM - 1:00 PM", room:"Block C - 305"},
+};
+const FEE_STATUS = {
+  tuition_due:"2026-09-20", amount:"Rs. 45,000",
+  late_fine_after_due:"Rs. 500 per week", hostel_maintenance_due:"2026-09-25",
+};
+const NOTICE_KEYWORDS = {
+  exam:"NOTICE #101: Mid-semester exams run 2026-09-15 to 2026-09-22. Timetable published 2026-09-08.",
+  library:"NOTICE #102: Library open 8AM-11PM weekdays, 9AM-6PM weekends until exams end.",
+  placement:"NOTICE #103: TNSDC Besant Campus Connect placement drive — registration closes 2026-09-10.",
+  fee:"NOTICE #104: Tuition fee due 2026-09-20, late fine Rs.500/week after that.",
+  lecture:"NOTICE #105: Guest lecture 'Building Agentic AI Systems on the Cloud' on 2026-09-12, 2PM, Main Auditorium.",
+  hostel:"NOTICE #106: Hostel quarterly maintenance fee due 2026-09-25.",
+  sports:"NOTICE #107: Annual Sports Day postponed from 2026-09-10 to 2026-09-24.",
+};
+
+const TOOLS = {
+  get_exam_schedule:{
+    fn:(code)=>{
+      const c = (code||"").toUpperCase();
+      const r = EXAM_SCHEDULE[c];
+      return r ? {found:true, course_code:c, ...r} : {found:false, course_code:c, message:`No exam schedule found for course code '${c}'.`};
+    },
+    trigger:["exam","schedule","room"],
+  },
+  get_fee_status:{
+    fn:()=> ({found:true, ...FEE_STATUS}),
+    trigger:["fee","fees","tuition","due","fine","payment"],
+  },
+  check_notices:{
+    fn:(keyword)=>{
+      const k = (keyword||"").toLowerCase();
+      let matches = Object.keys(NOTICE_KEYWORDS).filter(key=> key.includes(k) || k.includes(key)).map(key=>NOTICE_KEYWORDS[key]);
+      if(matches.length===0) matches = Object.values(NOTICE_KEYWORDS).filter(v=>v.toLowerCase().includes(k));
+      return {found:matches.length>0, keyword:k, notices:matches};
+    },
+    trigger:["notice","notices","announcement","circular"],
+  },
+  get_today:{
+    fn:()=> ({today:new Date().toISOString().slice(0,10)}),
+    trigger:["today's","date","current"],
+  },
+};
+
+/* =========================================================================
+   MEMORY — conversation history + auto-extracted student profile
+========================================================================= */
+const memory = {
+  history: [],
+  profile: {department:null, semester:null, roll_number:null},
+};
+function addTurn(role, content){ memory.history.push({role, content}); }
+function profileText(){
+  const known = Object.entries(memory.profile).filter(([,v])=>v);
+  return known.length ? known.map(([k,v])=>`${k}=${v}`).join(", ") : "No student profile information known yet.";
+}
+function autoExtractProfile(text){
+  const sem = text.match(/semester\s*(\d)/i);
+  if(sem) memory.profile.semester = sem[1];
+  const dept = text.match(/\b(CSE|IT|ECE|EEE|MECH|CIVIL|CS|AI|DS)\b/i);
+  if(dept) memory.profile.department = dept[1].toUpperCase();
+  const roll = text.match(/roll\s*(?:no\.?|number)?\s*[:\-]?\s*(\w+)/i);
+  if(roll) memory.profile.roll_number = roll[1];
+}
+
+/* =========================================================================
+   AGENT — router that combines RAG + Tools + Memory (mirrors agent.py)
+========================================================================= */
+function matchTool(question){
+  const q = question.toLowerCase();
+  if(/\b[a-z]{2,4}\d{3}\b/.test(q) && /(exam|schedule|room)/.test(q)) return "get_exam_schedule";
+  const qWords = new Set(tokenize(q));
+  let best=null, bestHits=0;
+  for(const [name, spec] of Object.entries(TOOLS)){
+    const hits = spec.trigger.filter(w=>qWords.has(w)).length;
+    if(hits>bestHits){ bestHits=hits; best=name; }
+  }
+  return best;
+}
+function extractArg(question, toolName){
+  if(toolName==="get_exam_schedule"){
+    const m = question.match(/\b([A-Za-z]{2,4}\d{3})\b/);
+    return m ? m[1] : "CS301";
+  }
+  if(toolName==="check_notices"){
+    const kws=["exam","library","placement","fee","lecture","hostel","sports"];
+    for(const kw of kws) if(question.toLowerCase().includes(kw)) return kw;
+    const words = question.trim().split(/\s+/);
+    return words[words.length-1];
+  }
+  return undefined;
+}
+const MEMORY_RECALL = [/what did i.*tell you/, /what do you know about me/, /my profile/, /what did i.*say/, /do you remember/, /what have i told you/];
+function isMemoryRecall(q){ const s=q.toLowerCase(); return MEMORY_RECALL.some(p=>p.test(s)); }
+
+function renderAnswer(toolResult, contextChunks){
+  let html = "";
+  if(toolResult){
+    html += `<strong>From live college systems</strong><ul>`;
+    if(Array.isArray(toolResult.notices)){
+      if(toolResult.notices.length){
+        toolResult.notices.forEach(n=> html += `<li>${escapeHtml(n)}</li>`);
+      } else {
+        html += `<li>No matching entries found.</li>`;
+      }
+    } else {
+      Object.entries(toolResult).forEach(([k,v])=>{
+        if(k==="found") return;
+        const label = k.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+        html += `<li>${label}: ${escapeHtml(String(v))}</li>`;
+      });
+    }
+    html += `</ul>`;
+  }
+  if(contextChunks.length){
+    html += `<strong>From college documents</strong><ul>`;
+    contextChunks.forEach(c=>{
+      const snippet = c.text.length>320 ? c.text.slice(0,320).replace(/\.[^.]*$/,".") : c.text;
+      html += `<li>${escapeHtml(snippet)}</li>`;
+    });
+    html += `</ul>`;
+  }
+  if(!toolResult && !contextChunks.length){
+    html = "I couldn't find that in the college regulations, syllabus, FAQ, or notices. Please contact the Administrative Office or your Head of Department.";
+  }
+  return html;
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function handle(question){
+  addTurn("user", question);
+  autoExtractProfile(question);
+
+  if(isMemoryRecall(question)){
+    const answer = `Here's what I currently have noted about you: ${profileText()}.`;
+    addTurn("assistant", answer);
+    return {html: escapeHtml(answer), badges:[{label:"memory recall", tool:false}]};
+  }
+
+  const toolName = matchTool(question);
+  let toolResult = null, badges = [];
+  if(toolName){
+    const arg = extractArg(question, toolName);
+    toolResult = TOOLS[toolName].fn(arg);
+    badges.push({label:`tool: ${toolName}`, tool:true});
+  }
+
+  let contextChunks = [];
+  if(!toolResult || toolName==="check_notices" || (toolResult && toolResult.found===false)){
+    contextChunks = ragQuery(question, 3);
+  }
+  contextChunks.forEach(c=> badges.push({label:`${c.source} · ${c.score.toFixed(2)}`, tool:false}));
+
+  const html = renderAnswer(toolResult, contextChunks);
+  addTurn("assistant", html);
+  return {html, badges};
+}
+
+/* =========================================================================
+   UI wiring
+========================================================================= */
+const log = document.getElementById("log");
+const input = document.getElementById("question");
+const sendBtn = document.getElementById("send");
+
+function addMessage(role, html, badges=[]){
+  const wrap = document.createElement("div");
+  wrap.className = `msg ${role}`;
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerHTML = html;
+  wrap.appendChild(bubble);
+  if(badges.length){
+    const prov = document.createElement("div");
+    prov.className = "provenance";
+    badges.forEach(b=>{
+      const s = document.createElement("span");
+      s.className = "stamp" + (b.tool ? " tool" : "");
+      s.textContent = b.label;
+      prov.appendChild(s);
+    });
+    wrap.appendChild(prov);
+  }
+  log.appendChild(wrap);
+  log.scrollTop = log.scrollHeight;
+}
+function addSystemNote(text){
+  const el = document.createElement("div");
+  el.className = "system-note";
+  el.textContent = text;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+}
+
+function ask(question){
+  if(!question.trim()) return;
+  addMessage("user", escapeHtml(question));
+  input.value = "";
+  setTimeout(()=>{
+    const {html, badges} = handle(question);
+    addMessage("assistant", html, badges);
+  }, 120);
+}
+
+sendBtn.addEventListener("click", ()=> ask(input.value));
+input.addEventListener("keydown", e=>{ if(e.key==="Enter") ask(input.value); });
+
+document.getElementById("btn-profile").addEventListener("click", ()=>{
+  addSystemNote(`Remembered profile — ${profileText()}`);
+});
+document.getElementById("btn-stats").addEventListener("click", ()=>{
+  const sources = [...new Set(DOCS.map(d=>d.source))];
+  addSystemNote(`Knowledge base — ${DOCS.length} chunks across ${sources.join(", ")}`);
+});
+document.getElementById("btn-reset").addEventListener("click", ()=>{
+  memory.history = [];
+  memory.profile = {department:null, semester:null, roll_number:null};
+  log.innerHTML = "";
+  addSystemNote("Conversation and memory cleared.");
+});
+
+const examples = [
+  "What is the minimum attendance required for exams?",
+  "When is my CS402 exam and which room?",
+  "Any notices about placements?",
+  "When is the tuition fee due?",
+];
+const chips = document.getElementById("chips");
+examples.forEach(ex=>{
+  const b = document.createElement("button");
+  b.className = "chip";
+  b.textContent = ex;
+  b.addEventListener("click", ()=> ask(ex));
+  chips.appendChild(b);
+});
+
+addSystemNote("Ask a question below, or tap an example to try the assistant.");
+</script>
+</body>
+</html>
